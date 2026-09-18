@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       nama_siswa:
-        description: 'Ghazi'
+        description: 'Nama'
         required: true
         default: 'Muhammad Ghazi Al Ghifari'
 
