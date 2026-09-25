@@ -1,12 +1,13 @@
 name: "Skenario 1 - Level 3 - Deploy Flask (release + cron)"
 
-# Trigger: tag rilis v* ATAU jadwal cron harian
+# Trigger: Push tag v*, Cron harian, ATAU Manual via UI GitHub Actions
 on:
   push:
     tags:
       - 'v*'
   schedule:
     - cron: '0 2 * * *'   # setiap hari jam 02:00 UTC
+  workflow_dispatch:      # Tambahan agar bisa dipicu manual
 
 jobs:
   deploy:
@@ -36,9 +37,9 @@ jobs:
           CF_ACCESS_HOSTNAME: ${{ secrets.CF_ACCESS_HOSTNAME }}
         run: |
           mkdir -p ~/.ssh
-          cat >> ~/.ssh/config <<EOC
+          cat >> ~/.ssh/config << 'EOC'
           Host vm-a
-            HostName ${CF_ACCESS_HOSTNAME}
+            HostName ${{ secrets.CF_ACCESS_HOSTNAME }}
             User ${{ secrets.VPS_USERNAME }}
             ProxyCommand cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
@@ -49,7 +50,10 @@ jobs:
         env:
           SSHPASS: ${{ secrets.VPS_PASSWORD }}
         run: |
-          ssh vm-a "sudo mkdir -p /opt/level3-flask && sudo chown \$USER:\$USER /opt/level3-flask"
+          sshpass -e ssh -o StrictHostKeyChecking=no vm-a "
+            echo '${SSHPASS}' | sudo -S mkdir -p /opt/level3-flask && \
+            echo '${SSHPASS}' | sudo -S chown -R \$USER:\$USER /opt/level3-flask
+          "
           sshpass -e scp -o StrictHostKeyChecking=no \
             skenario1-github-actions-vps-proxycommand/level3-python-flask-release/app/app.py \
             skenario1-github-actions-vps-proxycommand/level3-python-flask-release/app/requirements.txt \
@@ -60,9 +64,9 @@ jobs:
           SSHPASS: ${{ secrets.VPS_PASSWORD }}
           RELEASE_VERSION: ${{ steps.ver.outputs.version }}
         run: |
-          sshpass -e ssh vm-a "
-            /opt/level3-flask/venv/bin/pip install -r /opt/level3-flask/requirements.txt &&
-            sudo sed -i 's/^Environment=APP_VERSION=.*/Environment=APP_VERSION=${RELEASE_VERSION}/' /etc/systemd/system/level3-flask.service &&
-            sudo systemctl daemon-reload &&
-            sudo systemctl restart level3-flask
+          sshpass -e ssh -o StrictHostKeyChecking=no vm-a "
+            /opt/level3-flask/venv/bin/pip install -r /opt/level3-flask/requirements.txt && \
+            echo '${SSHPASS}' | sudo -S sed -i 's/^Environment=APP_VERSION=.*/Environment=APP_VERSION=${RELEASE_VERSION}/' /etc/systemd/system/level3-flask.service && \
+            echo '${SSHPASS}' | sudo -S systemctl daemon-reload && \
+            echo '${SSHPASS}' | sudo -S systemctl restart level3-flask
           "
