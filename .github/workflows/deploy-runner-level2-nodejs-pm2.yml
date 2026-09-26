@@ -36,8 +36,9 @@ jobs:
         run: |
           cd /opt/level2-node-pm2
           
-          # Hapus sudo karena folder sudah milik user aktif ($USER)
+          # Install dependencies lokal
           npm install
           
-          PORT=${APP_PORT} pm2 restart level2-node-pm2 --update-env || PORT=${APP_PORT} pm2 start server.js --name level2-node-pm2
-          pm2 save
+          # Gunakan npx pm2 agar runner dapat mengenali perintah pm2 secara otomatis
+          PORT=${APP_PORT} npx pm2 restart level2-node-pm2 --update-env || PORT=${APP_PORT} npx pm2 start server.js --name level2-node-pm2
+          npx pm2 save
