@@ -35,10 +35,8 @@ jobs:
           APP_PORT: ${{ github.event.inputs.port || '4100' }}
         run: |
           cd /opt/level2-node-pm2
-          
-          # Install dependencies lokal
           npm install
           
-          # Gunakan npx pm2 agar runner dapat mengenali perintah pm2 secara otomatis
+          # Gunakan npx pm2 agar runner dapat mengenali perintah pm2
           PORT=${APP_PORT} npx pm2 restart level2-node-pm2 --update-env || PORT=${APP_PORT} npx pm2 start server.js --name level2-node-pm2
           npx pm2 save
