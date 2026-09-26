@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'skenario2-self-hosted-runner/level1-static-nginx/app/**'
+  workflow_dispatch: # Tambahkan baris ini agar bisa di-run manual
 
 jobs:
   deploy:
