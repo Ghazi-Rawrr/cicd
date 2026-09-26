@@ -36,7 +36,8 @@ jobs:
         run: |
           cd /opt/level2-node-pm2
           
-          # Gunakan path absolut untuk npm dan pm2 agar runner pasti menemukannya
-          sudo /usr/bin/npm install
-          PORT=${APP_PORT} sudo /usr/bin/pm2 restart level2-node-pm2 --update-env || PORT=${APP_PORT} sudo /usr/bin/pm2 start server.js --name level2-node-pm2
-          sudo /usr/bin/pm2 save
+          # Hapus sudo karena folder sudah milik user aktif ($USER)
+          npm install
+          
+          PORT=${APP_PORT} pm2 restart level2-node-pm2 --update-env || PORT=${APP_PORT} pm2 start server.js --name level2-node-pm2
+          pm2 save
